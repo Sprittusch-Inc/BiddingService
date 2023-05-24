@@ -12,9 +12,6 @@ public class Vault
     private HttpClientHandler httpClientHandler;
     //private IVaultClient vaultClient;
     //private IAuthMethodInfo authMethod;
-    
-
-
 
 
     public Vault()
@@ -23,10 +20,6 @@ public class Vault
         httpClientHandler = new HttpClientHandler();
         httpClientHandler.ServerCertificateCustomValidationCallback =
         (message, cert, chain, sslPolicyErrors) => { return true; };
-
-
-
-
     }
 
     public async Task<string> GetSecret(string path, string key)
@@ -46,8 +39,6 @@ public class Vault
 
         IVaultClient vaultClient = new VaultClient(vaultClientSettings);
 
-
-
         // Use client to read a key-value secret.
         Secret<SecretData> kv2Secret = await vaultClient.V1.Secrets.KeyValue.V2.ReadSecretAsync(path: path, mountPoint: "secret");
 
@@ -55,7 +46,7 @@ public class Vault
 
         Console.WriteLine($"MySecret: {secret}");
 
-        return secret.ToString(); 
+        return secret.ToString()!;
     }
 
 }
