@@ -23,10 +23,6 @@ public class Vault
         httpClientHandler = new HttpClientHandler();
         httpClientHandler.ServerCertificateCustomValidationCallback =
         (message, cert, chain, sslPolicyErrors) => { return true; };
-
-
-
-
     }
 
     public async Task<string> GetSecret(string path, string key)
@@ -55,7 +51,7 @@ public class Vault
 
         Console.WriteLine($"MySecret: {secret}");
 
-        return secret.ToString(); 
+        return secret.ToString()!; 
     }
 
 }
