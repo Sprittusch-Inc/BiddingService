@@ -23,19 +23,17 @@ public class Worker : BackgroundService
         _logger = logger;
         _config = config;
         _hostName = _config["HostName"] ?? "localhost";
-
-        // string cons = vault.GetSecret("dbconnection", "auctiondb").Result;
-        string cons = "mongodb://localhost:27017";
+        string cons = vault.GetSecret("dbconnection", "constring").Result;
 
         _client = new MongoClient(cons);
-        _db = _client.GetDatabase("AuctionDB");
+        _db = _client.GetDatabase("Auction");
         _collection = _db.GetCollection<Auction>("Auctions");
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         _logger.LogInformation("Worker running at: {time}", DateTime.UtcNow);
-        var factory = new ConnectionFactory { HostName = "localhost" };
+        var factory = new ConnectionFactory { HostName = _hostName };
         using var connection = factory.CreateConnection();
         using var channel = connection.CreateModel();
 
