@@ -15,7 +15,7 @@ public class Worker : BackgroundService
     private readonly IMongoCollection<Auction> _collection;
     protected static IMongoClient? _client;
     protected static IMongoDatabase? _db;
-    private Vault vault = new();
+    private Vault vault;
 
 
     public Worker(ILogger<Worker> logger, IConfiguration config)
@@ -23,6 +23,7 @@ public class Worker : BackgroundService
         _logger = logger;
         _config = config;
         _hostName = _config["HostName"] ?? "localhost";
+        vault = new Vault(_config);
         string cons = vault.GetSecret("dbconnection", "constring").Result;
 
         _client = new MongoClient(cons);
