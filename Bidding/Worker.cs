@@ -34,6 +34,7 @@ public class Worker : BackgroundService
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
+        // Start af worker og oprettelse af queue med navnet "bids"
         _logger.LogInformation("Worker running at: {time}", DateTime.UtcNow);
         var factory = new ConnectionFactory { HostName = "localhost" };
         using var connection = factory.CreateConnection();
@@ -49,21 +50,25 @@ public class Worker : BackgroundService
 
         while (!stoppingToken.IsCancellationRequested)
         {
-
+            // Oprettelse af consumer som henter beskeder fra køen
             var consumer = new EventingBasicConsumer(channel);
             consumer.Received += (model, ea) =>
             {
                 var body = ea.Body.ToArray();
                 var message = Encoding.UTF8.GetString(body);
+
+                // Deserialisering af besked til et Bid-objekt
                 Bid? bid = JsonSerializer.Deserialize<Bid>(message);
                 _logger.LogInformation($"Received bid with BidId: {bid?.BidId}");
 
+                // Tjekker om buddet er mindre end nextbid for auktionen givet ved AuctionId i buddet
                 Auction auc = _collection.Find(Builders<Auction>.Filter.Eq("AuctionId", bid?.AuctionId)).FirstOrDefault();
                 if (bid?.Amount < auc.NextBid)
                 {
                     throw new Exception("Bid must be equal to or exceed next bid.");
                 }
 
+                // Tjekker om BidId allerede findes i listen af bud på auktionen
                 if (auc.Bids.Any(b => b.BidId == bid?.BidId))
                 {
                     throw new Exception("BidId already exists.");
@@ -71,11 +76,14 @@ public class Worker : BackgroundService
 
                 try
                 {
+                    // Opdaterer listen af bud, hvor buddet tilføjes og nextbid for auktionen sættes til at være buddet + minimumsbud
+                    _logger.LogInformation("Updating list of bids and NextBid of auction...");
                     var filter = Builders<Auction>.Filter.Eq("AuctionId", bid?.AuctionId);
                     var update = Builders<Auction>.Update
                         .Push(auction => auction.Bids, bid)
                         .Set(auction => auction.NextBid, bid?.Amount + auc.MinBid);
                     _collection.FindOneAndUpdate<Auction>(filter, update);
+                    _logger.LogInformation("List of bids and NextBid of auction updated.");
                 }
                 catch (Exception ex)
                 {
@@ -85,6 +93,7 @@ public class Worker : BackgroundService
 
             };
 
+            // Basic consume som fjerner beskeden fra køen
             channel.BasicConsume(
                 queue: "bids",
                 autoAck: true,
