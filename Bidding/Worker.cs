@@ -27,7 +27,7 @@ public class Worker : BackgroundService
         string cons = vault.GetSecret("dbconnection", "constring").Result;
 
         _client = new MongoClient(cons);
-        _db = _client.GetDatabase("Auction");
+        _db = _client.GetDatabase("AuctionDB");
         _collection = _db.GetCollection<Auction>("Auctions");
     }
 
