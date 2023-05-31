@@ -11,7 +11,8 @@ public class Worker : BackgroundService
 {
     private readonly ILogger<Worker> _logger;
     private readonly IConfiguration _config;
-    private static string? _hostName;
+    private static string? rabbitmqHost;
+    private static int rabbitmqPort;
     private readonly IMongoCollection<Auction> _collection;
     protected static IMongoClient? _client;
     protected static IMongoDatabase? _db;
@@ -22,7 +23,9 @@ public class Worker : BackgroundService
     {
         _logger = logger;
         _config = config;
-        _hostName = _config["HostName"] ?? "localhost";
+        rabbitmqHost = _config["RABBITMQ_HOST"] ?? "localhost";
+        rabbitmqPort = int.Parse(_config["RABBITMQ_PORT"]!);
+        
         vault = new Vault(_config);
         string cons = vault.GetSecret("dbconnection", "constring").Result;
 
@@ -35,7 +38,11 @@ public class Worker : BackgroundService
     {
         // Start af worker og oprettelse af queue med navnet "bids"
         _logger.LogInformation("Worker running at: {time}", DateTime.UtcNow);
-        var factory = new ConnectionFactory { HostName = _hostName };
+        var factory = new ConnectionFactory {
+            HostName = rabbitmqHost,
+            Port = rabbitmqPort
+        };
+        
         using var connection = factory.CreateConnection();
         using var channel = connection.CreateModel();
 
