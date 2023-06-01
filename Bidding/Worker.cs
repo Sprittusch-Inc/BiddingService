@@ -16,20 +16,30 @@ public class Worker : BackgroundService
     private readonly IMongoCollection<Auction> _collection;
     protected static IMongoClient? _client;
     protected static IMongoDatabase? _db;
-    private Vault vault;
+    private static string? _connString;
 
+    // Vault deployment-issues
+    /*
+    private Vault vault;
+    */
 
     public Worker(ILogger<Worker> logger, IConfiguration config)
     {
         _logger = logger;
         _config = config;
+        _connString = config["MongoConnection"];
         rabbitmqHost = _config["RABBITMQ_HOST"] ?? "localhost";
+        _logger.LogInformation($"rabbitmqHost is set to: {rabbitmqHost}");
         rabbitmqPort = int.Parse(_config["RABBITMQ_PORT"]!);
-        
+        _logger.LogInformation($"rabbitmqPort is set to: {rabbitmqPort}");
+
+        // Vault deployment-issues
+        /*
         vault = new Vault(_config);
         string cons = vault.GetSecret("dbconnection", "constring").Result;
+        */
 
-        _client = new MongoClient(cons);
+        _client = new MongoClient(_connString);
         _db = _client.GetDatabase("AuctionDB");
         _collection = _db.GetCollection<Auction>("Auctions");
     }

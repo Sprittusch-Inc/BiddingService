@@ -16,7 +16,7 @@ public class Vault
     public Vault(IConfiguration config)
     {
         _config = config;
-        EndPoint = _config["Vault_EndPoint"];
+        EndPoint = _config["Vault_EndPoint"]!;
         httpClientHandler = new HttpClientHandler();
         httpClientHandler.ServerCertificateCustomValidationCallback =
         (message, cert, chain, sslPolicyErrors) => { return true; };
