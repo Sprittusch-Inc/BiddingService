@@ -11,8 +11,14 @@
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="7.0.1" />
     <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="7.0.0" />
     <PackageReference Include="mongoDB.Driver" Version="2.19.1" />
+    <PackageReference Include="NLog" Version="5.1.5" />
+    <PackageReference Include="NLog.Targets.Loki" Version="1.4.6" />
+    <PackageReference Include="NLog.Web.AspNetCore" Version="5.2.3" />
     <PackageReference Include="rabbitmq" Version="3.6.2" />
     <PackageReference Include="RabbitMQ.Client" Version="6.5.0" />
     <PackageReference Include="vaultsharp" Version="1.13.0.1" />
+    <None Include="NLog.config">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 </Project>
